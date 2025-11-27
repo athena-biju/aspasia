@@ -1,0 +1,18 @@
+{
+  "id": "tx_normal",
+  "originator": {
+    "id": "BANK_002",
+    "name": "Tier 2 Bank",
+    "centrality": 0.08,
+    "kyc": true
+  },
+  "beneficiary": {
+    "id": "SME_123",
+    "name": "Small Merchant",
+    "centrality": 0.03,
+    "kyc": true
+  },
+  "amount": 15000,
+  "currency": "EUR",
+  "context": "Standard_EU_Transfer"
+}

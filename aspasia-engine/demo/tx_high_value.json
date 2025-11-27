@@ -1,0 +1,18 @@
+{
+  "id": "tx_high_value",
+  "originator": {
+    "id": "BANK_001",
+    "name": "Tier 1 Bank",
+    "centrality": 0.15,
+    "kyc": true
+  },
+  "beneficiary": {
+    "id": "CORP_042",
+    "name": "Corporate Account",
+    "centrality": 0.05,
+    "kyc": true
+  },
+  "amount": 250000,
+  "currency": "EUR",
+  "context": "MiCA_Title_III_Settlement"
+}

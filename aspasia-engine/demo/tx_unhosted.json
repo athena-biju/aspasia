@@ -1,0 +1,18 @@
+{
+  "id": "tx_unhosted",
+  "originator": {
+    "id": "WALLET_X",
+    "name": "Anonymous Wallet",
+    "centrality": 0.02,
+    "kyc": false
+  },
+  "beneficiary": {
+    "id": "EXCHANGE_Y",
+    "name": "Registered VASP",
+    "centrality": 0.10,
+    "kyc": true
+  },
+  "amount": 5000,
+  "currency": "EUR",
+  "context": "Virtual_Asset_Transfer"
+}
