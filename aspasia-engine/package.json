@@ -1,0 +1,11 @@
+{
+  "name": "maat-engine",
+  "version": "1.0.0",
+  "description": "MAAT Compliance Engine - investor ready with local, API, and container options",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "api": "node dist/api.js"
+  },
+  "dependencies": {}
+}
