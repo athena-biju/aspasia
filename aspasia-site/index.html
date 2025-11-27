@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAAT: Protocol-Embedded Policy - Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styles for specific layout needs */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #fdfbf7; /* Warm neutral background */
+            color: #1f2937;
+        }
+        
+        /* Chart Container Strict Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Interactive Card Styling */
+        .interactive-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #0d9488; /* Teal-600 */
+        }
+        .interactive-card.active {
+            border-color: #0d9488;
+            background-color: #f0fdfa; /* Teal-50 */
+        }
+
+        /* Timeline Node */
+        .timeline-node {
+            transition: all 0.3s ease;
+        }
+        .timeline-node:hover {
+            background-color: #0d9488;
+            border-color: #0d9488;
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    <!-- Chosen Palette: "Warm Professional" - Grounded in #fdfbf7 (Warm White/Cream), utilizing Slate #334155 for text, and Teal #0d9488 for primary actions/highlights to represent stability and growth. Amber #d97706 used sparingly for alerts/warnings. -->
+    <!-- Application Structure Plan:
+        1. Hero Section: High-level executive summary of MAAT's mission.
+        2. The Compliance Bottleneck (Problem): Visualization of the "False Positive" problem (90% rate) to establish urgency. Interactive comparison of Legacy vs. MAAT.
+        3. Market Intelligence (Context): Interactive grid for PESTLE analysis and Regulatory Drivers (Why Now?), allowing users to filter by category.
+        4. MAAT v1.0 Architecture (Solution): A 3-pillar interactive schematic (Compiler, Throttle, Explainer). Users click components to reveal technical logic from the report.
+        5. Deep Dive: Network Throttle (Innovation): A dynamic Chart.js Bubble chart simulating the "Hulten/Domar" I/O centrality concept. Users can toggle "Stress Mode" to see how MAAT throttles central nodes vs peripheral ones.
+        6. Strategic Roadmap: Vertical interactive timeline showing the phases from Pilot to Maturity.
+        Rationale: This structure moves from Problem -> Context -> Solution -> Technical Proof -> Execution, mirroring a logical investment memo flow while breaking dense text into interactive layers.
+    -->
+    <!-- Visualization & Content Choices:
+        1. Problem Chart: Donut Chart (Chart.js) showing 90% False Positives. Goal: Inform/Shock. Justification: Visualizes the scale of inefficiency cited in source (NICE Actimize).
+        2. Throttle Simulation: Bubble Chart (Chart.js). Goal: Relationships/Inform. X/Y axis = Transaction Volume/Frequency. Bubble Size = Centrality. Color = Risk Status. Justification: Visually demonstrates the "Network-Aware" concept which is abstract in text.
+        3. PESTLE Grid: CSS Grid + JS Filtering. Goal: Organize. Justification: PESTLE is a list; filtering makes it digestible.
+        4. Architecture Diagram: HTML/CSS Flexbox + JS. Goal: Inform/Structure. Justification: No SVG allowed. Using styled divs to represent the "Intelligence Layer", "Ledger Layer", etc.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-slate-800 tracking-tight">MAAT <span class="text-teal-600 text-sm font-medium ml-2">Protocol-Embedded Policy</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <button onclick="scrollToSection('problem')" class="text-gray-600 hover:text-teal-600 font-medium">The Bottleneck</button>
+                    <button onclick="scrollToSection('context')" class="text-gray-600 hover:text-teal-600 font-medium">Market Context</button>
+                    <button onclick="scrollToSection('solution')" class="text-gray-600 hover:text-teal-600 font-medium">v1.0 Architecture</button>
+                    <button onclick="scrollToSection('simulation')" class="text-gray-600 hover:text-teal-600 font-medium">Throttle Simulation</button>
+                    <button onclick="scrollToSection('roadmap')" class="text-gray-600 hover:text-teal-600 font-medium">Roadmap</button>
+                </div>
+                <!-- Mobile menu button placeholder -->
+                <div class="flex items-center md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-teal-600">
+                        <span class="text-xl">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <button onclick="scrollToSection('problem')" class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">The Bottleneck</button>
+                <button onclick="scrollToSection('context')" class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Market Context</button>
+                <button onclick="scrollToSection('solution')" class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Architecture</button>
+                <button onclick="scrollToSection('simulation')" class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Simulation</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-gradient-to-br from-slate-50 to-teal-50 py-20">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6">
+                Protocol-Embedded Policy for <br class="hidden sm:block"> <span class="text-teal-600">Tractable Monetary Systems</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+                Reconciling 21st-century financial rails with 20th-century supervision. 
+                MAAT moves compliance from <strong>ex-post reconciliation</strong> to <strong>ex-ante enforcement</strong>, 
+                eliminating "Institutional Sludge" through AI, Blockchain, and Network-Aware Throttling.
+            </p>
+            <div class="flex justify-center gap-4">
+                <button onclick="scrollToSection('problem')" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition transform hover:-translate-y-1">
+                    Explore the Problem
+                </button>
+                <button onclick="scrollToSection('solution')" class="bg-white hover:bg-gray-50 text-teal-700 border border-teal-200 font-semibold py-3 px-8 rounded-lg shadow transition">
+                    View v1.0 Solution
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: The Problem (The Compliance Bottleneck) -->
+    <section id="problem" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">The Compliance Bottleneck</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">
+                    Current systems operate on "Institutional Sludge"—manual review loops, fragile thresholds, and systemic loopholes. 
+                    This results in massive operational inefficiency.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Data Viz: The Cost of Sludge -->
+                <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 text-center">Efficiency Gap: Legacy AML Systems</h3>
+                    <div class="chart-container">
+                        <canvas id="efficiencyChart"></canvas>
+                    </div>
+                    <p class="text-sm text-center text-slate-500 mt-4">Source: NICE Actimize (2024) - >90% False Positive Rate</p>
+                </div>
+
+                <!-- Textual Context -->
+                <div class="space-y-6">
+                    <div class="p-6 border-l-4 border-amber-500 bg-amber-50 rounded-r-lg">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">1. Institutional Sludge</h4>
+                        <p class="text-slate-700">Human review loops, manual escalations, and brittle rule thresholds create bottlenecks. Case queues pile up while bad actors use speed to evade detection.</p>
+                    </div>
+                    <div class="p-6 border-l-4 border-teal-500 bg-teal-50 rounded-r-lg">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">2. Systemic Loopholes</h4>
+                        <p class="text-slate-700">Policy evasion occurs through routine-like fashions, such as multi-hop routing that outruns watchlists. Cross-jurisdiction spillover effects remain unaddressed.</p>
+                    </div>
+                    <div class="p-6 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2">3. The Information Gap</h4>
+                        <p class="text-slate-700">Confidence is a function of settlement-time information. With ~$2T in stablecoin flows, shocks traverse production networks before manual control can activate.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Market Context (PESTLE & Drivers) -->
+    <section id="context" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">Why Now? Market Intelligence</h2>
+                <p class="mt-4 text-lg text-slate-600">
+                    Regulatory urgency (MiCA, Basel) and macroeconomic shifts are forcing a transition from reactive checks to deterministic proof.
+                    Explore the PESTLE analysis below.
+                </p>
+            </div>
+
+            <!-- Interactive Filters -->
+            <div class="flex flex-wrap gap-2 mb-8">
+                <button onclick="filterPestle('all')" class="pestle-filter active px-4 py-2 rounded-full text-sm font-medium bg-slate-200 text-slate-700 hover:bg-teal-100 hover:text-teal-700 transition" data-filter="all">All Factors</button>
+                <button onclick="filterPestle('political')" class="pestle-filter px-4 py-2 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-600 transition" data-filter="political">Political & Legal</button>
+                <button onclick="filterPestle('economic')" class="pestle-filter px-4 py-2 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-600 transition" data-filter="economic">Economic</button>
+                <button onclick="filterPestle('tech')" class="pestle-filter px-4 py-2 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-600 transition" data-filter="tech">Technological</button>
+            </div>
+
+            <!-- PESTLE Grid -->
+            <div id="pestle-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: MAAT v1.0 Architecture -->
+    <section id="solution" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">MAAT v1.0: The Pilot Core</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">
+                    The solution unifies State (Ledger) and Rules (Policy) into a single atomic transaction. 
+                    Click on the components below to understand the v1.0 Pilot deliverables.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Component 1 -->
+                <div class="interactive-card bg-white border-2 border-slate-100 rounded-xl p-6 relative overflow-hidden group" onclick="showArchDetail('compiler')">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20">
+                        <span class="text-6xl font-bold text-slate-800">01</span>
+                    </div>
+                    <div class="h-12 w-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4 text-teal-600 font-bold text-xl">P</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Policy-as-Code Compiler</h3>
+                    <p class="text-slate-600 text-sm">Converts human-readable regulation (YAML) into executable smart contract predicates.</p>
+                    <div class="mt-4 text-teal-600 text-sm font-medium flex items-center">
+                        View Logic <span class="ml-2">→</span>
+                    </div>
+                </div>
+
+                <!-- Component 2 -->
+                <div class="interactive-card bg-white border-2 border-slate-100 rounded-xl p-6 relative overflow-hidden group" onclick="showArchDetail('throttle')">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20">
+                        <span class="text-6xl font-bold text-slate-800">02</span>
+                    </div>
+                    <div class="h-12 w-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4 text-amber-600 font-bold text-xl">T</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Network-Aware Throttle</h3>
+                    <p class="text-slate-600 text-sm">Dynamic liquidity limiting based on I/O centrality scores to prevent systemic contagion.</p>
+                    <div class="mt-4 text-teal-600 text-sm font-medium flex items-center">
+                        View Logic <span class="ml-2">→</span>
+                    </div>
+                </div>
+
+                <!-- Component 3 -->
+                <div class="interactive-card bg-white border-2 border-slate-100 rounded-xl p-6 relative overflow-hidden group" onclick="showArchDetail('explainer')">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20">
+                        <span class="text-6xl font-bold text-slate-800">03</span>
+                    </div>
+                    <div class="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4 text-indigo-600 font-bold text-xl">E</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Cryptographic Explainer</h3>
+                    <p class="text-slate-600 text-sm">Generates natural-language audit trails for every decision, ensuring NIST AI-RMF compliance.</p>
+                    <div class="mt-4 text-teal-600 text-sm font-medium flex items-center">
+                        View Logic <span class="ml-2">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Detail View -->
+            <div id="arch-detail" class="mt-10 bg-slate-50 border border-slate-200 rounded-xl p-8 hidden">
+                <h4 id="detail-title" class="text-2xl font-bold text-slate-900 mb-4"></h4>
+                <p id="detail-desc" class="text-slate-700 text-lg leading-relaxed mb-6"></p>
+                <div class="bg-white p-4 rounded-lg border border-slate-200">
+                    <strong class="text-slate-900 block mb-2">Key Functionality:</strong>
+                    <ul id="detail-list" class="list-disc list-inside text-slate-600 space-y-2"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Deep Dive - Network Throttle Simulation -->
+    <section id="simulation" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl font-bold text-slate-900">Economic Mechanism: I/O Centrality</h2>
+                    <p class="mt-4 text-slate-600">
+                        Standard compliance applies flat limits. MAAT applies <strong>Domar-Weighted limits</strong>. 
+                        Central nodes (High I/O) pose systemic risk and are throttled more aggressively during stress.
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <span class="mr-3 text-sm font-medium text-slate-700">Normal State</span>
+                        <input type="checkbox" id="stressToggle" class="sr-only peer" onchange="toggleStressMode()">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                        <span class="ml-3 text-sm font-medium text-amber-600 font-bold">Network Stress Event</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- The Chart -->
+                <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="chart-container">
+                        <canvas id="throttleChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Explanation Panel -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center">
+                    <div id="sim-status" class="mb-6">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 mb-2">Status: Normal</span>
+                        <h4 class="text-xl font-bold text-slate-900">Standard Flow</h4>
+                        <p class="text-slate-600 text-sm mt-2">All nodes operating within standard limits. No systemic contagion detected.</p>
+                    </div>
+                    <div class="border-t border-slate-100 pt-4">
+                        <h5 class="font-bold text-slate-800 mb-2">Legend</h5>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-center"><span class="w-3 h-3 rounded-full bg-slate-400 mr-2"></span> Peripheral Node (Low Risk)</li>
+                            <li class="flex items-center"><span class="w-3 h-3 rounded-full bg-teal-500 mr-2"></span> Intermediary Node</li>
+                            <li class="flex items-center"><span class="w-4 h-4 rounded-full bg-indigo-600 mr-2"></span> Central Node (High I/O)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Roadmap -->
+    <section id="roadmap" class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-900 text-center mb-12">Strategic Roadmap</h2>
+            
+            <div class="relative border-l-2 border-slate-200 ml-6 md:ml-0 space-y-12">
+                <!-- Phase 1 -->
+                <div class="timeline-node relative pl-12 md:pl-0">
+                    <div class="absolute -left-[9px] top-0 w-5 h-5 bg-teal-600 rounded-full border-4 border-white shadow-sm"></div>
+                    <div class="md:grid md:grid-cols-5 md:gap-8">
+                        <div class="md:col-span-1 text-sm font-bold text-teal-600 uppercase tracking-wider mb-1 md:mb-0 md:text-right pt-0.5">Weeks 8-13</div>
+                        <div class="md:col-span-4 bg-slate-50 p-6 rounded-lg border border-slate-100 shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-900">Phase 1: Pilot & Core Development</h3>
+                            <p class="text-slate-600 mt-2">Deployment of Compiler v0, Network-Aware Throttle, and basic Explainer Engine. Baseline trials with synthetic transaction data.</p>
+                            <ul class="mt-4 space-y-1 text-sm text-slate-500">
+                                <li>• Condense 15 policy obligations to YAML</li>
+                                <li>• Wire friction scores into smart contract limits</li>
+                                <li>• Deliver model card & governance note</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="timeline-node relative pl-12 md:pl-0 opacity-70 hover:opacity-100">
+                    <div class="absolute -left-[9px] top-0 w-5 h-5 bg-slate-300 rounded-full border-4 border-white"></div>
+                    <div class="md:grid md:grid-cols-5 md:gap-8">
+                        <div class="md:col-span-1 text-sm font-bold text-slate-500 uppercase tracking-wider mb-1 md:mb-0 md:text-right pt-0.5">2026</div>
+                        <div class="md:col-span-4 bg-white p-6 rounded-lg border border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800">Phase 2: Launch & Beta</h3>
+                            <p class="text-slate-600 mt-2">Live regulatory sandbox testing. Beta release with key partners (mid-sized banks/challengers).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="timeline-node relative pl-12 md:pl-0 opacity-70 hover:opacity-100">
+                    <div class="absolute -left-[9px] top-0 w-5 h-5 bg-slate-300 rounded-full border-4 border-white"></div>
+                    <div class="md:grid md:grid-cols-5 md:gap-8">
+                        <div class="md:col-span-1 text-sm font-bold text-slate-500 uppercase tracking-wider mb-1 md:mb-0 md:text-right pt-0.5">2027</div>
+                        <div class="md:col-span-4 bg-white p-6 rounded-lg border border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800">Phase 3: Expansion</h3>
+                            <p class="text-slate-600 mt-2">Cross-border integration. Focusing on scaling transaction volume and proving I/O centrality resilience at scale.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <span class="text-white text-xl font-bold">MAAT</span>
+                <p class="mt-4 text-sm">Building the future of financial infrastructure with AI, Blockchain, and Scalable Compliance.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Core Technology</h4>
+                <ul class="space-y-2 text-sm">
+                    <li>Policy-as-Code Compiler</li>
+                    <li>Network-Aware Throttle</li>
+                    <li>Zero-Knowledge Proofs</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Contact</h4>
+                <p class="text-sm">Athena Biju</p>
+                <p class="text-sm">Finance & Infrastructure Lead</p>
+                <p class="text-sm mt-2">team@ma-at.io</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Navigation Logic ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // --- 2. Data Visualization (Chart.js) ---
+        
+        // A. Efficiency Chart (Donut)
+        const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+        const efficiencyChart = new Chart(efficiencyCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['False Positives (Inefficiency)', 'True Risks'],
+                datasets: [{
+                    data: [90, 10],
+                    backgroundColor: ['#cbd5e1', '#0d9488'], // Slate-300, Teal-600
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: 'Inter' }, usePointStyle: true }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // B. Network Throttle Simulation (Bubble Chart)
+        const throttleCtx = document.getElementById('throttleChart').getContext('2d');
+        
+        // Simulation Data
+        // x: Transaction Volume, y: Connectivity, r: Centrality (Size)
+        const normalData = [
+            { x: 10, y: 10, r: 5, label: 'Peripheral', type: 'low' },
+            { x: 15, y: 20, r: 6, label: 'Peripheral', type: 'low' },
+            { x: 50, y: 40, r: 15, label: 'Intermediary', type: 'mid' },
+            { x: 80, y: 80, r: 25, label: 'Central Node (High I/O)', type: 'high' }, // The Central Node
+            { x: 60, y: 50, r: 12, label: 'Intermediary', type: 'mid' },
+            { x: 20, y: 15, r: 5, label: 'Peripheral', type: 'low' }
+        ];
+
+        // Colors
+        const colorLow = '#94a3b8'; // Slate 400
+        const colorMid = '#14b8a6'; // Teal 500
+        const colorHigh = '#4f46e5'; // Indigo 600
+        const colorStressed = '#d97706'; // Amber 600 (Throttle Active)
+
+        const throttleChart = new Chart(throttleCtx, {
+            type: 'bubble',
+            data: {
+                datasets: [{
+                    label: 'Network Nodes',
+                    data: normalData,
+                    backgroundColor: (ctx) => {
+                        const val = ctx.raw;
+                        if (!val) return colorLow;
+                        if (val.type === 'high') return colorHigh;
+                        if (val.type === 'mid') return colorMid;
+                        return colorLow;
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Transaction Volume' },
+                        min: 0, max: 100
+                    },
+                    y: {
+                        title: { display: true, text: 'Network Connectivity' },
+                        min: 0, max: 100
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const node = ctx.raw;
+                                let status = "Normal Limit";
+                                if (isStressMode && node.type === 'high') status = "THROTTLED (Prevent Contagion)";
+                                return `${node.label}: ${status}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        let isStressMode = false;
+
+        function toggleStressMode() {
+            isStressMode = !isStressMode;
+            const statusDiv = document.getElementById('sim-status');
+            const toggle = document.getElementById('stressToggle');
+            
+            if (isStressMode) {
+                // Stress Mode UI
+                statusDiv.innerHTML = `
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-2">Status: STRESS EVENT</span>
+                    <h4 class="text-xl font-bold text-slate-900">Throttle Activated</h4>
+                    <p class="text-slate-600 text-sm mt-2">
+                        I/O Centrality detected on <strong>Central Node</strong>. 
+                        Limits tightened automatically to dampen shock propagation (Hulten's Domar Weights logic).
+                    </p>
+                `;
+                
+                // Update Chart Colors for High Centrality Node
+                throttleChart.data.datasets[0].backgroundColor = (ctx) => {
+                    const val = ctx.raw;
+                    if (!val) return colorLow;
+                    if (val.type === 'high') return colorStressed; // Change to Amber
+                    if (val.type === 'mid') return colorMid;
+                    return colorLow;
+                };
+                
+            } else {
+                // Normal Mode UI
+                statusDiv.innerHTML = `
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 mb-2">Status: Normal</span>
+                    <h4 class="text-xl font-bold text-slate-900">Standard Flow</h4>
+                    <p class="text-slate-600 text-sm mt-2">All nodes operating within standard limits. No systemic contagion detected.</p>
+                `;
+
+                // Revert Colors
+                throttleChart.data.datasets[0].backgroundColor = (ctx) => {
+                    const val = ctx.raw;
+                    if (!val) return colorLow;
+                    if (val.type === 'high') return colorHigh;
+                    if (val.type === 'mid') return colorMid;
+                    return colorLow;
+                };
+            }
+            throttleChart.update();
+        }
+
+        // --- 3. Interactive Content Logic ---
+
+        // A. PESTLE Data & Filtering
+        const pestleData = [
+            { category: 'political', icon: '⚖️', title: 'Regulatory Scrutiny', desc: 'MiCA, FATF Travel Rule. Govts exploring CBDCs.' },
+            { category: 'economic', icon: '💰', title: 'Inflation & Fees', desc: 'Inflation drives stable asset demand. High correspondent banking fees create market vacuum.' },
+            { category: 'political', icon: '📜', title: 'Legal Conflicts', desc: 'GDPR "Right to be Forgotten" conflicts with immutable ledgers (Solved by ZKPs).' },
+            { category: 'tech', icon: '🤖', title: 'AI Maturity', desc: 'Real-time fraud detection AI is now viable. ISO 20022 adoption enables richer data.' },
+            { category: 'economic', icon: '📉', title: 'Network Shocks', desc: 'SVB Collapse ($42B exit) proved human review cannot outrun bank runs.' },
+            { category: 'tech', icon: '🔗', title: 'Energy Efficiency', desc: 'Shift to Proof-of-Stake aligns with ESG mandates.' }
+        ];
+
+        function renderPestle(filter) {
+            const container = document.getElementById('pestle-grid');
+            container.innerHTML = '';
+            
+            const filtered = filter === 'all' ? pestleData : pestleData.filter(d => d.category === filter);
+            
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition';
+                div.innerHTML = `
+                    <div class="text-3xl mb-3">${item.icon}</div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-2">${item.title}</h4>
+                    <p class="text-slate-600 text-sm">${item.desc}</p>
+                    <span class="inline-block mt-3 text-xs font-bold uppercase tracking-wider text-slate-400">${item.category}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            // Update buttons
+            document.querySelectorAll('.pestle-filter').forEach(btn => {
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('bg-teal-100', 'text-teal-700', 'border-transparent');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+                } else {
+                    btn.classList.remove('bg-teal-100', 'text-teal-700', 'border-transparent');
+                    btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+                }
+            });
+        }
+
+        function filterPestle(category) {
+            renderPestle(category);
+        }
+
+        // Initial Render
+        renderPestle('all');
+
+        // B. Architecture Detail View
+        const archDetails = {
+            compiler: {
+                title: "Policy-as-Code Compiler (v0)",
+                desc: "The Compiler acts as the translation layer between legal ambiguity and deterministic execution. It takes YAML-based policy specifications (derived from MiCA/FATF text) and compiles them into rigid smart contract predicates.",
+                list: [
+                    "Automates 15 critical MiCA obligations.",
+                    "Input: YAML Policy Spec (Human readable).",
+                    "Output: Solidity/Rust binary checks.",
+                    "Goal: Reduce 'sludge' by automating deterministic rules."
+                ]
+            },
+            throttle: {
+                title: "Network-Aware Throttle",
+                desc: "Based on Hulten's Domar Weights logic, this mechanism recognizes that not all nodes are equal. It calculates I/O centrality scores off-chain and feeds them to the ledger. During stress, it applies tighter limits to central nodes to stop contagion.",
+                list: [
+                    "Real-time I/O centrality scoring.",
+                    "Dynamic circuit breaker for liquidity.",
+                    "Prevents macro-misallocation during panic.",
+                    "Prioritizes system stability over individual settlement speed."
+                ]
+            },
+            explainer: {
+                title: "Cryptographic Explainer Engine",
+                desc: "To satisfy the 'Right to Explanation' and audit requirements, this component logs the decision path of every smart contract execution. It produces a natural-language reason for every block/allow decision.",
+                list: [
+                    "Logs logic path (e.g., 'Blocked via Clause 4.2').",
+                    "Hashes logs for on-chain immutability.",
+                    "Decrypts to natural language for auditors.",
+                    "Aligns with NIST AI-RMF standards."
+                ]
+            }
+        };
+
+        function showArchDetail(key) {
+            const detailDiv = document.getElementById('arch-detail');
+            const content = archDetails[key];
+            
+            // Populate
+            document.getElementById('detail-title').innerText = content.title;
+            document.getElementById('detail-desc').innerText = content.desc;
+            
+            const listContainer = document.getElementById('detail-list');
+            listContainer.innerHTML = '';
+            content.list.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = item;
+                listContainer.appendChild(li);
+            });
+
+            // Show and Scroll
+            detailDiv.classList.remove('hidden');
+            // detailDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Highlight active card visual (simple toggle)
+            // In a real app we'd manage state better, but simple is fine here.
+        }
+
+    </script>
+</body>
+</html>
