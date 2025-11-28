@@ -1,4 +1,4 @@
-# MA’AT Compliance Engine v1.0
+# ASPASIA Compliance Engine v1.0
 
 Welcome to the **MA’AT Compliance Engine**.  This repository contains a complete,
 working prototype of a **policy‑as‑code engine** designed to enforce
