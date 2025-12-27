@@ -1,6 +1,6 @@
 # ASPASIA Compliance Engine v1.0
 
-Welcome to the **MA’AT Compliance Engine**.  This repository contains a complete,
+Welcome to the **ASPASIA Compliance Engine**. This repository contains a complete,
 working prototype of a **policy‑as‑code engine** designed to enforce
 financial regulations (MiCA, Basel III, FATF, etc.) across payment networks.
 It includes a local command‑line interface, a REST API, and containerised
@@ -89,7 +89,7 @@ You can then call the API as described above.
 
 ## Architecture Summary
 
-The core of MA’AT consists of three modules:
+The core of ASPASIA consists of three modules:
 
 1. **Policy Compiler** (`src/policyCompiler.js`) – Parses YAML files into
    executable rule objects.  Each rule encapsulates its own evaluation logic
