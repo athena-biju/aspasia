@@ -300,32 +300,6 @@ with col_tx:
             engine = PolicyEngine(rules)
             result = engine.evaluate(tx)
 
-            st.markdown(
-                f"### Decision: **{result['decision']}**"
-                + (f"  (winning rule: `{result['rule']}`)" if result["rule"] else "")
-            )
-            st.markdown(
-                "**Matched rules:** "
-                + (", ".join(result["matched_rules"]) or "_none_")
-            )
-
-            with st.expander("Transaction JSON", expanded=False):
-                st.code(json.dumps(tx, indent=2), language="json")
-
-            with st.expander("Evaluation trace", expanded=True):
-                st.code(json.dumps(result["trace"], indent=2), language="json")
-
-        except Exception as e:
-            st.error(f"Error while parsing rules or evaluating: {e}")
-    else:
-        st.info("Pick a transaction, optionally tweak the amount, then click **Evaluate**.")
-
-if st.button("Evaluate", type="primary"):
-        try:
-            rules = load_rules_from_yaml(rules_text)
-            engine = PolicyEngine(rules)
-            result = engine.evaluate(tx)
-
             # 1. Show the Decision
             st.markdown(
                 f"### Decision: **{result['decision']}**"
