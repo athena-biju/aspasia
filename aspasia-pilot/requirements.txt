@@ -1,2 +1,5 @@
 streamlit
 pyyaml
+fastapi
+uvicorn
+requests
