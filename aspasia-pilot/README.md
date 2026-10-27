@@ -1,52 +1,44 @@
-# ASPASIA: Protocol-Embedded Policy Engine
+# ASPASIA Pilot — Inspectable Transaction-Rule Simulation
 
-**A Deterministic "Policy-as-Code" Engine for Ex-Ante Transaction Screening**
+This directory contains **Python prototype source** for evaluating illustrative financial transaction conditions and inspecting rule decisions. It is a demonstrator for research and pilot discussions, not a production service or a substitute for legal advice.
 
-ASPASIA is a lightweight, strict-liability compliance engine designed to enforce regulatory obligations (such as MiCA and FATF) directly within transaction flows. Unlike stochastic AI agents, ASPASIA utilizes a recursive **Abstract Syntax Tree (AST)** to compile regulatory text into machine-executable logic, ensuring 100% determinism and auditability for financial institutions.
+## Files and entry points
 
-**[Live Demo](https://aspasia-pilot.streamlit.app)**
+- `app.py`: Streamlit interface for experimenting with rules and sample transaction inputs.
+- `api_server.py`: FastAPI application; the source exposes `/`, `/stats`, and `POST /enforce` routes.
+- `stress_test.py`: a requests-based traffic generator for local experimentation; results should not be interpreted as proven production throughput.
+- `demo.html`: a static demonstration asset.
+- `requirements.txt`: dependencies needed for the visible demonstration and API scripts.
 
----
+## Run locally (development only)
 
-## Architectural Highlights
-
-This repository demonstrates the transition from manual "institutional sludge" to automated **Machine-Executable Regulation**. Key architectural decisions include:
-
-### 1. Deterministic AST vs. Stochastic Agents
-Financial regulation requires certainty, not probability. While LLM-based agents are powerful, they are prone to hallucination.
-* **The Architecture:** ASPASIA implements a recursive `CompositeCondition` class. This constructs a traverseable Abstract Syntax Tree (AST) where complex rules are decomposed into atomic boolean predicates.
-* **The Advantage:** This ensures that every decision is mathematically provable. The engine generates a JSON `trace` for every evaluation, providing a cryptographic-grade audit trail without stochastic variability.
-
-### 2. Explicit Conflict Resolution Strategy
-In production environments, regulatory rules often collide (e.g., a "VIP Allow" rule vs. a "Sanctions Block" rule).
-* **The Logic:** The `PolicyEngine` enforces a strict precedence hierarchy defined in the `evaluate` method.
-* **The Algorithm:** Conflicts are resolved via a tuple sort: `(ActionSeverity, RulePriority)`.
-    * **Action Severity:** A `BLOCK` (Rank 2) strictly overrides a `FLAG` (Rank 1), regardless of priority. This guarantees that safety-critical "Strict Liability" rules cannot be bypassed by lower-severity business logic.
-    * **Rule Priority:** Within the same severity tier, higher integer priority rules take precedence.
-
----
-
-## Repository Structure
-
-* **`app.py`** (formerly `aspasia_ui.py`):
-    The **Pilot Core**. A Streamlit-based simulator that allows compliance officers to edit YAML rules, simulate transactions, and visualize the decision tree and AST execution trace in real-time.
-
-* **`main.py`**:
-    The **Intelligence Layer**. A headless FastAPI microservice designed for production integration. It exposes REST endpoints (`POST /enforce`) to accept transaction payloads and return millisecond-latency decisions.
-
-* **`stress_test.py`**:
-    A performance benchmarking script. It generates synthetic transaction traffic to measure system throughput and latency, validating the engine's capability for "Ex-Ante" (pre-settlement) enforcement.
-
----
-
-## Getting Started
-
-### Prerequisites
-* Python 3.9+
-* pip
-
-### 1. Installation
-Clone the repository and install the required dependencies:
+From `aspasia-pilot/`:
 
 ```bash
-pip install streamlit fastapi uvicorn pyyaml requests
+python -m pip install -r requirements.txt
+streamlit run app.py
+```
+
+To run the API in another terminal:
+
+```bash
+uvicorn api_server:app --reload
+```
+
+Review the source and generated traces before relying on any results. These commands are based on the checked-in entry points; execution and deployment were **not independently validated** during this documentation clean-up.
+
+## What this prototype aims to demonstrate
+
+1. Represent illustrative conditions as explicit, inspectable rule logic.
+2. Evaluate sample transactions against those conditions.
+3. Report the result and a decision trace suitable for human review.
+4. Explore how changing rules or scenario inputs changes the outcome.
+
+## Important boundaries
+
+- Deterministic rule evaluation for a given input is **not** proof that the policy itself is legally correct, complete, or secure.
+- A JSON decision trace is **not** a cryptographic integrity guarantee unless its provenance and tamper resistance are separately established.
+- The presence of a `stress_test.py` script is **not** a verified latency, availability, security or throughput claim.
+- Regulatory references are illustrative and require qualified legal validation before use in a real workflow.
+
+Repository overview: [ASPASIA project root](../README.md).
